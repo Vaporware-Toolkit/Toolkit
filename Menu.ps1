@@ -1,30 +1,30 @@
 # === CONFIG FROM GITHUB ===
-$configUrl = "https://raw.githubusercontent.com/Vaporware-Toolkit/Toolkit/main/Config.json" 
+$configUrl = "https://raw.githubusercontent.com/Vaporware-Toolkit/Toolkit/main/Config.json"
 $expectedHash = "6e7b0acc474f423452449ae652557c6f868d96e6eae9a76706e92c5fe2b8d351"
 
 function Get-ConfigJson {
     try {
-        Write-Host "Fetching config.json from GitHub..." -ForegroundColor Cyan
-        $jsonData = Invoke-RestMethod -Uri $configUrl -UseBasicParsing
+        Write-Host "Fetching Config.json from GitHub..." -ForegroundColor Cyan
 
-        # Convert JSON to compressed string and then to bytes
-        $jsonString = $jsonData | ConvertTo-Json -Compress
-        $bytes = [System.Text.Encoding]::UTF8.GetBytes($jsonString)
+        # Fetch raw content as string
+        $rawJson = Invoke-RestMethod -Uri $configUrl -UseBasicParsing
 
-        # Compute SHA256 hash
+        # Compute SHA256 hash on the raw string
         $sha256 = [System.Security.Cryptography.SHA256]::Create()
-        $hashBytes = $sha256.ComputeHash($bytes)
-        $hash = ($hashBytes | ForEach-Object { $_.ToString("x2") }) -join ""
+        $bytes = [System.Text.Encoding]::UTF8.GetBytes($rawJson)
+        $hash = ($sha256.ComputeHash($bytes) | ForEach-Object { $_.ToString("x2") }) -join ""
 
         if ($hash -ne $expectedHash) {
             Write-Host "Config hash mismatch! Aborting." -ForegroundColor Red
+            Write-Host "Expected: $expectedHash"
+            Write-Host "Actual  : $hash"
             return $null
         } else {
             Write-Host "Config verified successfully." -ForegroundColor Green
-            return $jsonData | ConvertFrom-Json
+            return $rawJson | ConvertFrom-Json
         }
     } catch {
-        Write-Host "Failed to fetch or parse config.json: $_" -ForegroundColor Red
+        Write-Host "Failed to fetch or parse Config.json: $_" -ForegroundColor Red
         return $null
     }
 }
@@ -35,28 +35,36 @@ $tools = @{
     "Manalyzer" = "6"; "Metadefender" = "7"; "Sandbox Pikker" = "8"; "Polyswarm" = "9"; "TY Labs Scan" = "10";
     "Checkpoint ThreatPoint" = "11"; "SecondWrite Webportal" = "12"; "Talos Intelligence" = "13"; "VirusTotal" = "14";
     "Kaspersky OpenTip" = "15"; "Jotti" = "16"; "URLVoid" = "17"; "URLScan.io" = "18"; "Quttera" = "19";
-    "FileScan.io" = "20"; "VirScan.org" = "21"; "Sucuri SiteCheck" = "22"; "NordVPN File Checker" = "23"; "Dr.Web VMS" = "24";
-    "ScanMalware.com" = "25"; "Internxt Virus Scanner" = "26"; "DynamiteLab" = "27"; "VMRay" = "28"; "SecondWrite" = "29";
-    "MalShare" = "30"; "Acronis" = "31"; "EmailVeritas File Checker" = "32"; "Watchdog Online Scanner" = "33";
-    "Kaspersky Free Antivirus" = "34"; "Bitdefender Free" = "35"; "Dr.Web CureIt!" = "36"; "HitmanPro" = "37";
-    "ProtonVPN" = "38"; "Mullvad" = "39"; "NordVPN" = "40"; "TunnelBear" = "41"; "Quad9 DNS" = "42"; "NextDNS" = "43";
-    "Cloudflare DNS" = "44"; "AdGuard DNS" = "45"; "ControlD DNS" = "46"; "NordVPN Private DNS" = "47"; "DNS.Watch" = "48";
-    "JoinDNS4" = "49"; "IDA Auth" = "50"; "dnSpy" = "51"; "ILSpy" = "52"; "LibreWolf Browser" = "53"; "Brave Browser" = "54";
-    "Tor Browser" = "55"; "Mullvad Browser" = "56"; "Gnuzilla" = "57"; "Waterfox" = "58"; "AdNauseam" = "59"; "Privacy Badger" = "60";
-    "HTTPS Everywhere" = "61"; "uBlock Origin" = "62"; "Qwant (Chrome)" = "63"; "Qwant (Firefox)" = "64"; "Startpage (Chrome)" = "65";
-    "Startpage (Firefox)" = "66"; "JShelter" = "67"; "Cookie AutoDelete" = "68"; "LibRedirect Website" = "69"; "LibRedirect GitHub" = "70";
-    "Telegram" = "71"; "Nekogram" = "72"; "Signal" = "73"; "Threema" = "74"; "Session" = "75"; "Element" = "76"; "Briar" = "77"; "Simplex Chat" = "78";
-    "Revo Uninstaller" = "79"; "Geek Uninstaller" = "80"; "Uninstalr" = "81"; "Bulk Crap Uninstaller" = "82"; "FindMySoft" = "83"; "Uninstall Tool" = "84";
-    "Win11Debloat" = "85"; "Windows10Debloater" = "86"; "Android Platform Tools" = "87"; "Brave Android" = "88"; "Firefox Android" = "89"; "Adblock Browser Android" = "90";
-    "AdGuard Content Blocker" = "91"; "Aura Suite" = "92"; "Firefox Focus" = "93"; "VoiceNote" = "94"; "Pink App" = "95"; "Organdramatraiin" = "96";
-    "ToLink" = "97"; "NowLookM" = "98"; "Tigtog" = "99"; "Mannic APK" = "100"; "Popcorn Time APK" = "101"; "VideoFlow Player" = "102"; "Bingo Shoppers" = "103";
-    "Cine Rader" = "104"; "Denmolaryan" = "105"; "Vimo EditFilm" = "106"; "FansLike MovieInfo" = "107"; "MyCinely App" = "108"; "FansLike MovieInfo (2)" = "109";
-    "LineageOS" = "110"; "CalyxOS" = "111"; "GrapheneOS" = "112"; "CopperheadOS" = "113"; "MicroG GmsCore" = "114"; "AdBlock Pro iOS" = "115"; "AdGuard iOS" = "116";
-    "1Blocker" = "117"; "Brave iOS" = "118"; "Hush Nag Blocker" = "119"; "Firefox Focus iOS" = "120"; "Firefox iOS" = "121"; "Aura iOS" = "122"; "Kali Linux" = "123";
-    "Lubuntu" = "124"; "Arch Linux" = "125"; "Fedora" = "126"; "Red Hat" = "127"; "Debian" = "128"; "Ventoy" = "129"; "Rufus" = "130"; "Technitium MAC" = "131";
-    "Quax" = "132"; "OnionShare" = "133"; "2FA Authenticator" = "134"; "Microsoft Authenticator" = "135"; "Google Authenticator" = "136"; "Yubico Authenticator" = "137";
-    "FreeOTP" = "138"; "Proton Authenticator" = "139"; "Authy" = "140"; "Proton 2FA Android" = "141"; "Aegis 2FA" = "142"; "TwoFAS App" = "143"; "Authy Android" = "144";
-    "Google Authenticator Android" = "145"; "Azure Authenticator" = "146"; "Yubico Auth Android" = "147"; "Ente Auth" = "148"; "FreeOTP Android" = "149"
+    "FileScan.io" = "20"; "VirScan.org" = "21"; "Sucuri SiteCheck" = "22"; "NordVPN File Checker" = "23"; 
+    "Dr.Web VMS" = "24"; "ScanMalware.com" = "25"; "Internxt Virus Scanner" = "26"; "DynamiteLab" = "27"; 
+    "VMRay" = "28"; "SecondWrite" = "29"; "MalShare" = "30"; "Acronis" = "31"; "EmailVeritas File Checker" = "32"; 
+    "Watchdog Online Scanner" = "33"; "Kaspersky Free Antivirus" = "34"; "Bitdefender Free" = "35"; 
+    "Dr.Web CureIt!" = "36"; "HitmanPro" = "37"; "ProtonVPN" = "38"; "Mullvad" = "39"; "NordVPN" = "40"; 
+    "TunnelBear" = "41"; "Quad9 DNS" = "42"; "NextDNS" = "43"; "Cloudflare DNS" = "44"; "AdGuard DNS" = "45"; 
+    "ControlD DNS" = "46"; "NordVPN Private DNS" = "47"; "DNS.Watch" = "48"; "JoinDNS4" = "49"; "IDA Auth" = "50"; 
+    "dnSpy" = "51"; "ILSpy" = "52"; "LibreWolf Browser" = "53"; "Brave Browser" = "54"; "Tor Browser" = "55"; 
+    "Mullvad Browser" = "56"; "Gnuzilla" = "57"; "Waterfox" = "58"; "AdNauseam" = "59"; "Privacy Badger" = "60"; 
+    "HTTPS Everywhere" = "61"; "uBlock Origin" = "62"; "Qwant (Chrome)" = "63"; "Qwant (Firefox)" = "64"; 
+    "Startpage (Chrome)" = "65"; "Startpage (Firefox)" = "66"; "JShelter" = "67"; "Cookie AutoDelete" = "68"; 
+    "LibRedirect Website" = "69"; "LibRedirect GitHub" = "70"; "Telegram" = "71"; "Nekogram" = "72"; "Signal" = "73"; 
+    "Threema" = "74"; "Session" = "75"; "Element" = "76"; "Briar" = "77"; "Simplex Chat" = "78"; 
+    "Revo Uninstaller" = "79"; "Geek Uninstaller" = "80"; "Uninstalr" = "81"; "Bulk Crap Uninstaller" = "82"; 
+    "FindMySoft" = "83"; "Uninstall Tool" = "84"; "Win11Debloat" = "85"; "Windows10Debloater" = "86"; 
+    "Android Platform Tools" = "87"; "Brave Android" = "88"; "Firefox Android" = "89"; "Adblock Browser Android" = "90"; 
+    "AdGuard Content Blocker" = "91"; "Aura Suite" = "92"; "Firefox Focus" = "93"; "VoiceNote" = "94"; "Pink App" = "95"; 
+    "Organdramatraiin" = "96"; "ToLink" = "97"; "NowLookM" = "98"; "Tigtog" = "99"; "Mannic APK" = "100"; 
+    "Popcorn Time APK" = "101"; "VideoFlow Player" = "102"; "Bingo Shoppers" = "103"; "Cine Rader" = "104"; 
+    "Denmolaryan" = "105"; "Vimo EditFilm" = "106"; "FansLike MovieInfo" = "107"; "MyCinely App" = "108"; 
+    "FansLike MovieInfo (2)" = "109"; "LineageOS" = "110"; "CalyxOS" = "111"; "GrapheneOS" = "112"; "CopperheadOS" = "113"; 
+    "MicroG GmsCore" = "114"; "AdBlock Pro iOS" = "115"; "AdGuard iOS" = "116"; "1Blocker" = "117"; "Brave iOS" = "118"; 
+    "Hush Nag Blocker" = "119"; "Firefox Focus iOS" = "120"; "Firefox iOS" = "121"; "Aura iOS" = "122"; 
+    "Kali Linux" = "123"; "Lubuntu" = "124"; "Arch Linux" = "125"; "Fedora" = "126"; "Red Hat" = "127"; "Debian" = "128"; 
+    "Ventoy" = "129"; "Rufus" = "130"; "Technitium MAC" = "131"; "Quax" = "132"; "OnionShare" = "133"; 
+    "2FA Authenticator" = "134"; "Microsoft Authenticator" = "135"; "Google Authenticator" = "136"; 
+    "Yubico Authenticator" = "137"; "FreeOTP" = "138"; "Proton Authenticator" = "139"; "Authy" = "140"; 
+    "Proton 2FA Android" = "141"; "Aegis 2FA" = "142"; "TwoFAS App" = "143"; "Authy Android" = "144"; 
+    "Google Authenticator Android" = "145"; "Azure Authenticator" = "146"; "Yubico Auth Android" = "147"; 
+    "Ente Auth" = "148"; "FreeOTP Android" = "149"
 }
 
 # === CATEGORY MAPPING ===
@@ -77,7 +85,7 @@ $categories = @{
     "Authenticator / 2FA Apps" = @("2FA Authenticator","Microsoft Authenticator","Google Authenticator","Yubico Authenticator","FreeOTP","Proton Authenticator","Authy","Proton 2FA Android","Aegis 2FA","TwoFAS App","Authy Android","Google Authenticator Android","Azure Authenticator","Yubico Auth Android","Ente Auth","FreeOTP Android")
 }
 
-# === CATEGORY MENU ===
+# === SHOW CATEGORY MENU ===
 function Show-CategoryMenu {
     Write-Host "`n=== Vaporware Toolkit Categories ===`n" -ForegroundColor Cyan
     $i = 1
@@ -88,9 +96,10 @@ function Show-CategoryMenu {
     Write-Host "`n0. Exit`n"
 }
 
-# === TOOLS MENU ===
+# === SHOW TOOLS MENU ===
 function Show-ToolsMenu {
     param([array]$names, [hashtable]$config)
+
     $i = 1
     $toolMap = @{}
     foreach ($name in $names) {
@@ -102,9 +111,10 @@ function Show-ToolsMenu {
     return $toolMap
 }
 
-# === MAIN MENU LOOP ===
+# === RUN MAIN MENU ===
 function Run-MainMenu {
     param([hashtable]$config)
+
     while ($true) {
         Show-CategoryMenu
         $choice = Read-Host "Enter category number"
@@ -131,7 +141,7 @@ function Run-MainMenu {
     }
 }
 
-# === MAIN EXECUTION ===
+# === MAIN ===
 $config = Get-ConfigJson
 if ($config) {
     Run-MainMenu -config $config
