@@ -2,7 +2,6 @@ $ErrorActionPreference = "Stop"
 
 $base = "https://raw.githubusercontent.com/Vaporware-Toolkit/Toolkit/main"
 $configUrl     = "$base/Config.json"
-$toolsUrl      = "$base/tools.json"
 $categoriesUrl = "$base/categories.json"
 $contributorsUrl = "$base/Contributors.ps1"
 
