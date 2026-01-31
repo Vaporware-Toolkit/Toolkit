@@ -1,15 +1,14 @@
 # =========================================
-# Vaporware Toolkit Loader (Hardened, UTF-8)
+# Vaporware Toolkit Loader (Hardened, UTF-8, PS5.1+)
 # =========================================
 
 $ErrorActionPreference = "Stop"
 
 $base = "https://raw.githubusercontent.com/Vaporware-Toolkit/Toolkit/main"
 
-$menuUrl   = "$base/Menu.ps1"
-$configUrl = "$base/Config.json"
-$categories = "$base/categories.json"
-$tools = "$base/tools.json"
+$menuUrl      = "$base/Menu.ps1"
+$configUrl    = "$base/Config.json"
+$categoriesUrl = "$base/categories.json"
 
 $cacheDir  = Join-Path $env:LOCALAPPDATA "VaporwareToolkit"
 $menuPath  = Join-Path $cacheDir "Menu.ps1"
@@ -17,12 +16,12 @@ $hashPath  = Join-Path $cacheDir "Menu.sha256"
 
 Write-Host "`n[Vaporware Toolkit] Loader starting..." -ForegroundColor Cyan
 
-# --- Ensure cache directory ---
+# --- Ensure cache directory exists ---
 if (-not (Test-Path $cacheDir)) {
     New-Item -ItemType Directory -Path $cacheDir | Out-Null
 }
 
-# --- Check reachability ---
+# --- Check reachability of remote files ---
 try {
     Invoke-WebRequest -Uri $configUrl -UseBasicParsing -TimeoutSec 10 | Out-Null
     $remoteMenu = Invoke-WebRequest -Uri $menuUrl -UseBasicParsing -TimeoutSec 10
@@ -31,16 +30,14 @@ try {
     exit 1
 }
 
-# --- Compute remote hash ---
+# --- Compute SHA256 of remote menu ---
 $remoteBytes = [System.Text.Encoding]::UTF8.GetBytes($remoteMenu.Content)
-$remoteHash  = (Get-FileHash `
-    -InputStream ([System.IO.MemoryStream]::new($remoteBytes)) `
-    -Algorithm SHA256).Hash
+$remoteHash  = (Get-FileHash -InputStream ([System.IO.MemoryStream]::new($remoteBytes)) -Algorithm SHA256).Hash
 
 $updateNeeded = $true
 
 # --- Compare with cached hash ---
-if (Test-Path $menuPath -and Test-Path $hashPath) {
+if ((Test-Path $menuPath) -and (Test-Path $hashPath)) {
     $localHash = Get-Content $hashPath -Encoding UTF8 -ErrorAction SilentlyContinue
     if ($localHash -eq $remoteHash) {
         $updateNeeded = $false
@@ -72,8 +69,6 @@ if ($policy -eq "Restricted") {
 # --- Launch Menu ---
 Write-Host "`n[+] Launching Vaporware Toolkit Menu..." -ForegroundColor Green
 
-Start-Process powershell `
-    -ArgumentList "-NoProfile -File `"$menuPath`"" `
-    -WindowStyle Normal
+Start-Process powershell -ArgumentList "-NoProfile -File `"$menuPath`"" -WindowStyle Normal
 
 exit
