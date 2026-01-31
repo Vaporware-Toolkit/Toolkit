@@ -42,31 +42,30 @@ function Show-Contributors {
     }
 }
 
-# --- Show Categories ---
+# --- Show Categories (Sections) ---
 function Show-Categories {
-    Write-Host "`n=== Categories ===`n" -ForegroundColor Cyan
+    Write-Host "`n=== Sections ===`n" -ForegroundColor Cyan
     $map = @{}
     $i = 1
-    foreach ($c in $categories.Keys | Sort-Object) {
-        Write-Host "$i. $c"
-        $map[$i] = $c
+    foreach ($section in $categories.Keys | Sort-Object) {
+        Write-Host "$i. $section"
+        $map[$i] = $section
         $i++
     }
     Write-Host "`n0. Exit"
     return $map
 }
 
-# --- Show Tools ---
+# --- Show Tools in Section ---
 function Show-Tools {
-    param ($category)
-    Write-Host "`n=== $category ===`n" -ForegroundColor Cyan
+    param ($section)
+    Write-Host "`n=== $section ===`n" -ForegroundColor Cyan
     $map = @{}
-    $i = 1
-    foreach ($id in $categories[$category] | Sort-Object) {
-        if ($config.ContainsKey($id)) {
-            Write-Host "$i. $($config[$id].Name)"
-            $map[$i] = $id
-            $i++
+    foreach ($id in $categories[$section] | Sort-Object) {
+        $idStr = "$id" # <-- force string
+        if ($config.ContainsKey($idStr)) {
+            Write-Host "$idStr. $($config[$idStr].Name)"
+            $map[$idStr] = $config[$idStr]
         }
     }
     Write-Host "`n0. Back"
@@ -78,25 +77,28 @@ Show-Contributors
 
 while ($true) {
     $catMap = Show-Categories
-    $choice = Read-Host "Select category"
+    $choice = Read-Host "Select section"
     if ($choice -eq "0") { break }
     if (-not $catMap.ContainsKey([int]$choice)) { continue }
 
-    $category = $catMap[[int]$choice]
+    $section = $catMap[[int]$choice]
 
     while ($true) {
-        $toolMap = Show-Tools $category
-        $toolChoice = Read-Host "Select tool"
+        $toolMap = Show-Tools $section
+        $toolChoice = Read-Host "Select tool (use ID)"
         if ($toolChoice -eq "0") { break }
-        if (-not $toolMap.ContainsKey([int]$toolChoice)) { continue }
+        if (-not $toolMap.ContainsKey("$toolChoice")) { 
+            Write-Host "Invalid selection" -ForegroundColor Yellow
+            continue 
+        }
 
-        $id = $toolMap[[int]$toolChoice]
+        $tool = $toolMap["$toolChoice"]
 
         # Open the URL associated with the tool
-        if ($config[$id].PSObject.Properties.Name -contains "URL") {
-            Start-Process $config[$id].URL
+        if ($tool.PSObject.Properties.Name -contains "URL") {
+            Start-Process $tool.URL
         } else {
-            Write-Host "No URL found for $($config[$id].Name)" -ForegroundColor Yellow
+            Write-Host "No URL found for $($tool.Name)" -ForegroundColor Yellow
         }
     }
 }
