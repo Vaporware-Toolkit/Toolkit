@@ -34,7 +34,7 @@ function Get-ConfigJson {
             $hashTable[$prop.Name] = $prop.Value
         }
         # Add Bloodware System Suite (ID 150) as a PS1 script on GitHub
-        $hashTable["150"] = "https://raw.githubusercontent.com/Vaporware-Toolkit/Toolkit/main/BloodwareSystemSuite.ps1"
+        $hashTable["150"] = "https://github.com/Vaporware-Toolkit/Toolkit/raw/refs/heads/main/Bloodware-Suite/Menu.ps1"
         return $hashTable
     } catch {
         Write-Host "Failed to fetch Config.json: $_" -ForegroundColor Red
