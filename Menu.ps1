@@ -1,8 +1,8 @@
 $ErrorActionPreference = "Stop"
 
 $base = "https://raw.githubusercontent.com/Vaporware-Toolkit/Toolkit/main"
-$configUrl     = "$base/Config.json"
-$categoriesUrl = "$base/categories.json"
+$configUrl      = "$base/Config.json"
+$categoriesUrl  = "$base/categories.json"
 $contributorsUrl = "$base/Contributors.ps1"
 
 # --- Fetch JSON as Hashtable ---
@@ -22,8 +22,8 @@ function Get-JsonHashtable {
     }
 }
 
+# Fetch config and categories
 $config     = Get-JsonHashtable $configUrl
-$tools      = Get-JsonHashtable $toolsUrl
 $categories = Get-JsonHashtable $categoriesUrl
 
 # --- Contributors ---
@@ -63,9 +63,11 @@ function Show-Tools {
     $i = 1
     $map = @{}
     foreach ($id in $categories[$category]) {
-        Write-Host "$i. $($tools[$id])"
-        $map[$i] = $id
-        $i++
+        if ($config.ContainsKey($id)) {
+            Write-Host "$i. $($config[$id].Name)"
+            $map[$i] = $id
+            $i++
+        }
     }
     Write-Host "`n0. Back"
     return $map
@@ -89,6 +91,12 @@ while ($true) {
         if (-not $toolMap.ContainsKey([int]$toolChoice)) { continue }
 
         $id = $toolMap[[int]$toolChoice]
-        Start-Process $config[$id]
+
+        # Open the URL associated with the tool
+        if ($config[$id].PSObject.Properties.Name -contains "URL") {
+            Start-Process $config[$id].URL
+        } else {
+            Write-Host "No URL found for $($config[$id].Name)" -ForegroundColor Yellow
+        }
     }
 }
