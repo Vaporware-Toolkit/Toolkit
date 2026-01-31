@@ -8,6 +8,8 @@ $base = "https://raw.githubusercontent.com/Vaporware-Toolkit/Toolkit/main"
 
 $menuUrl   = "$base/Menu.ps1"
 $configUrl = "$base/Config.json"
+$categories = "$base/categories.json"
+$tools = "$base/tools.json"
 
 $cacheDir  = Join-Path $env:LOCALAPPDATA "VaporwareToolkit"
 $menuPath  = Join-Path $cacheDir "Menu.ps1"
