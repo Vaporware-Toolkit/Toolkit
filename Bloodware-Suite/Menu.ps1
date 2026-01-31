@@ -1,6 +1,6 @@
 # ==============================================================
 # BLOODWARE SYSTEM SUITE – FULL ALL-IN-ONE SAFE MENU
-# Vencord removed; includes PS7, DNS, Discord, WHFS, IE, BIOS, GPU, .NET
+# Includes PS7, DNS, Discord, WHFS, IE, BIOS, GPU, .NET
 # ==============================================================
 
 Clear-Host
