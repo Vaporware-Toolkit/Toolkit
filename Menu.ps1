@@ -1,5 +1,5 @@
 # === LOCAL CONFIG PATH & EXPECTED HASH ===
-$configPath = ".\config.json"
+$configPath = "\config.json"
 $expectedHash = "3380e3672ffd50394d8d9bd0750eb1d67ffdf728a72e5afded85b26df6a57347"
 
 # === FUNCTION: Read and Verify Config ===
