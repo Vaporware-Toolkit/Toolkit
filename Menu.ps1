@@ -1,6 +1,6 @@
 # === CONFIG FROM GITHUB ===
 $configUrl = "https://raw.githubusercontent.com/Vaporware-Toolkit/Toolkit/main/Config.json" 
-$expectedHash = "3380e3672ffd50394d8d9bd0750eb1d67ffdf728a72e5afded85b26df6a57347"
+$expectedHash = "6e7b0acc474f423452449ae652557c6f868d96e6eae9a76706e92c5fe2b8d351"
 
 function Get-ConfigJson {
     try {
