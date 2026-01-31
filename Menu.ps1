@@ -1,20 +1,15 @@
-# === LOCAL CONFIG PATH & EXPECTED HASH ===
-$configPath = "/config.json"
+# === CONFIG FROM GITHUB ===
+$configUrl = "https://raw.githubusercontent.com/Vaporware-Toolkit/Toolkit/main/config.json"
 $expectedHash = "3380e3672ffd50394d8d9bd0750eb1d67ffdf728a72e5afded85b26df6a57347"
 
-# === FUNCTION: Read and Verify Config ===
 function Get-ConfigJson {
     try {
-        if (-not (Test-Path $configPath)) {
-            Write-Host "Config file not found at $configPath" -ForegroundColor Red
-            return $null
-        }
-
-        $jsonData = Get-Content -Path $configPath -Raw
+        Write-Host "Fetching config.json from GitHub..." -ForegroundColor Cyan
+        $jsonData = Invoke-RestMethod -Uri $configUrl -UseBasicParsing
 
         # Compute SHA256 hash
         $sha256 = [System.Security.Cryptography.SHA256]::Create()
-        $bytes = [System.Text.Encoding]::UTF8.GetBytes($jsonData)
+        $bytes = [System.Text.Encoding]::UTF8.GetBytes($jsonData | ConvertTo-Json -Compress)
         $hash = ($sha256.ComputeHash($bytes) | ForEach-Object { $_.ToString("x2") }) -join ""
 
         if ($hash -ne $expectedHash) {
@@ -25,9 +20,21 @@ function Get-ConfigJson {
             return $jsonData | ConvertFrom-Json
         }
     } catch {
-        Write-Host "Failed to read or parse config.json: $_" -ForegroundColor Red
+        Write-Host "Failed to fetch or parse config.json: $_" -ForegroundColor Red
         return $null
     }
+}
+
+# === MAIN ===
+$config = Get-ConfigJson
+if ($config) {
+    Run-MainMenu -config $config
+}
+
+# === MAIN ===
+$config = Get-ConfigJson
+if ($config) {
+    Run-MainMenu -config $config
 }
 
 # === FRIENDLY NAMES MAPPING ===
