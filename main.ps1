@@ -4,7 +4,7 @@
 
 $ErrorActionPreference = "Stop"
 
-$base = "https://raw.githubusercontent.com/Vaporware-Toolkit/Toolkit/main"
+$base = "https://raw.githubusercontent.com/Vaporware-Toolkit/Toolkit/Lite"
 
 $menuUrl      = "$base/Menu.ps1"
 $configUrl    = "$base/Config.json"
