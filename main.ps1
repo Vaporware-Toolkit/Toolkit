@@ -1,4 +1,4 @@
-$base = "https://raw.githubusercontent.com/Vaporware-Toolkit/Toolkit/main/data"
+$base = "https://github.com/Vaporware-Toolkit/Toolkit/raw/refs/heads/main/Menu.ps1"
 
 $configUrl     = "$base/config.json"
 $toolsUrl      = "$base/tools.json"
