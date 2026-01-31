@@ -45,9 +45,9 @@ function Show-Contributors {
 # --- Show Categories ---
 function Show-Categories {
     Write-Host "`n=== Categories ===`n" -ForegroundColor Cyan
-    $i = 1
     $map = @{}
-    foreach ($c in $categories.Keys) {
+    $i = 1
+    foreach ($c in $categories.Keys | Sort-Object) {
         Write-Host "$i. $c"
         $map[$i] = $c
         $i++
@@ -60,9 +60,9 @@ function Show-Categories {
 function Show-Tools {
     param ($category)
     Write-Host "`n=== $category ===`n" -ForegroundColor Cyan
-    $i = 1
     $map = @{}
-    foreach ($id in $categories[$category]) {
+    $i = 1
+    foreach ($id in $categories[$category] | Sort-Object) {
         if ($config.ContainsKey($id)) {
             Write-Host "$i. $($config[$id].Name)"
             $map[$i] = $id
