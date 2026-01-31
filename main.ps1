@@ -1,73 +1,77 @@
+# =========================================
+# Vaporware Toolkit Loader (Hardened, UTF-8)
+# =========================================
+
+$ErrorActionPreference = "Stop"
+
 $base = "https://raw.githubusercontent.com/Vaporware-Toolkit/Toolkit/main"
 
-$configUrl     = "$base/Config.json"
-$toolsUrl      = "$base/tools.json"
-$categoriesUrl = "$base/categories.json"
-$menuURL = "$base/Menu.json"
+$menuUrl   = "$base/Menu.ps1"
+$configUrl = "$base/Config.json"
 
-function Get-JsonHashtable {
-    param ($url)
-    $raw = Invoke-WebRequest $url -UseBasicParsing
-    $obj = $raw.Content | ConvertFrom-Json
-    $ht = @{}
-    foreach ($p in $obj.PSObject.Properties) {
-        $ht[$p.Name] = $p.Value
-    }
-    return $ht
+$cacheDir  = Join-Path $env:LOCALAPPDATA "VaporwareToolkit"
+$menuPath  = Join-Path $cacheDir "Menu.ps1"
+$hashPath  = Join-Path $cacheDir "Menu.sha256"
+
+Write-Host "`n[Vaporware Toolkit] Loader starting..." -ForegroundColor Cyan
+
+# --- Ensure cache directory ---
+if (-not (Test-Path $cacheDir)) {
+    New-Item -ItemType Directory -Path $cacheDir | Out-Null
 }
 
-$config     = Get-JsonHashtable $configUrl
-$tools      = Get-JsonHashtable $toolsUrl
-$categories = Get-JsonHashtable $categoriesUrl
-
-function Show-Categories {
-    Write-Host "`n=== Categories ===`n" -ForegroundColor Cyan
-    $i = 1
-    $map = @{}
-    foreach ($c in $categories.Keys) {
-        Write-Host "$i. $c"
-        $map[$i] = $c
-        $i++
-    }
-    Write-Host "`n0. Exit"
-    return $map
+# --- Check reachability ---
+try {
+    Invoke-WebRequest -Uri $configUrl -UseBasicParsing -TimeoutSec 10 | Out-Null
+    $remoteMenu = Invoke-WebRequest -Uri $menuUrl -UseBasicParsing -TimeoutSec 10
+} catch {
+    Write-Host "[!] Required files unreachable. Aborting." -ForegroundColor Red
+    exit 1
 }
 
-function Show-Tools {
-    param ($category)
+# --- Compute remote hash ---
+$remoteBytes = [System.Text.Encoding]::UTF8.GetBytes($remoteMenu.Content)
+$remoteHash  = (Get-FileHash `
+    -InputStream ([System.IO.MemoryStream]::new($remoteBytes)) `
+    -Algorithm SHA256).Hash
 
-    Write-Host "`n=== $category ===`n" -ForegroundColor Cyan
-    $i = 1
-    $map = @{}
+$updateNeeded = $true
 
-    foreach ($id in $categories[$category]) {
-        $name = $tools["$id"]
-        Write-Host "$i. $name"
-        $map[$i] = "$id"
-        $i++
-    }
-
-    Write-Host "`n0. Back"
-    return $map
-}
-
-while ($true) {
-    $catMap = Show-Categories
-    $choice = Read-Host "Select category"
-
-    if ($choice -eq "0") { break }
-    if (-not $catMap.ContainsKey([int]$choice)) { continue }
-
-    $category = $catMap[[int]$choice]
-
-    while ($true) {
-        $toolMap = Show-Tools $category
-        $toolChoice = Read-Host "Select tool"
-
-        if ($toolChoice -eq "0") { break }
-        if (-not $toolMap.ContainsKey([int]$toolChoice)) { continue }
-
-        $id = $toolMap[[int]$toolChoice]
-        Start-Process $config[$id]
+# --- Compare with cached hash ---
+if (Test-Path $menuPath -and Test-Path $hashPath) {
+    $localHash = Get-Content $hashPath -Encoding UTF8 -ErrorAction SilentlyContinue
+    if ($localHash -eq $remoteHash) {
+        $updateNeeded = $false
     }
 }
+
+# --- Update cache if needed ---
+if ($updateNeeded) {
+    Write-Host "[*] Updating Menu.ps1..." -ForegroundColor Yellow
+    $remoteMenu.Content | Out-File -FilePath $menuPath -Encoding UTF8 -Force
+    $remoteHash         | Out-File -FilePath $hashPath -Encoding UTF8 -Force
+} else {
+    Write-Host "[+] Menu.ps1 is up to date." -ForegroundColor Green
+}
+
+# --- Display integrity hash ---
+Write-Host "[i] Menu.ps1 SHA-256:" -ForegroundColor Cyan
+Write-Host "    $remoteHash" -ForegroundColor DarkGray
+
+# --- Execution policy check ---
+$policy = Get-ExecutionPolicy -Scope CurrentUser
+if ($policy -eq "Restricted") {
+    Write-Host "`n[!] PowerShell execution policy is Restricted." -ForegroundColor Yellow
+    Write-Host "    Allow local scripts to run:" -ForegroundColor Yellow
+    Write-Host "    Set-ExecutionPolicy -Scope CurrentUser RemoteSigned" -ForegroundColor Cyan
+    exit 1
+}
+
+# --- Launch Menu ---
+Write-Host "`n[+] Launching Vaporware Toolkit Menu..." -ForegroundColor Green
+
+Start-Process powershell `
+    -ArgumentList "-NoProfile -File `"$menuPath`"" `
+    -WindowStyle Normal
+
+exit
