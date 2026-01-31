@@ -1,8 +1,9 @@
-$base = "https://github.com/Vaporware-Toolkit/Toolkit/raw/refs/heads/main/Menu.ps1"
+$base = "https://raw.githubusercontent.com/Vaporware-Toolkit/Toolkit/main/"
 
-$configUrl     = "$base/config.json"
+$configUrl     = "$base/Config.json"
 $toolsUrl      = "$base/tools.json"
 $categoriesUrl = "$base/categories.json"
+$menuURL = "$base/Menu.json"
 
 function Get-JsonHashtable {
     param ($url)
