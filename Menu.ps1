@@ -116,7 +116,18 @@ while ($true) {
 
         $tool = $toolMap["$toolChoice"]
 
-        if ($tool.PSObject.Properties.Name -contains "URL" -and $tool.URL) {
+        # Special handling for option 150 (PS1 script) - run in memory
+        if ($toolChoice -eq "150") {
+            try {
+                Write-Host "`nFetching $($tool.Name) from GitHub..." -ForegroundColor Cyan
+                $psCode = Invoke-WebRequest -Uri $tool.URL -UseBasicParsing
+                Write-Host "Running $($tool.Name) in memory..." -ForegroundColor Cyan
+                Invoke-Expression $psCode.Content
+            } catch {
+                Write-Host "`n[Error] Failed to fetch or run $($tool.Name): $_" -ForegroundColor Red
+            }
+        }
+        elseif ($tool.PSObject.Properties.Name -contains "URL" -and $tool.URL) {
             Write-Host "`nLaunching $($tool.Name)..." -ForegroundColor Cyan
             Start-Process $tool.URL
         } else {
