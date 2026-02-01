@@ -148,5 +148,5 @@
   "147": { "Name": "Yubico Authenticator Android", "URL": "https://play.google.com/store/apps/details?id=com.yubico.yubioath" },
   "148": { "Name": "Ente Auth Authenticator Android", "URL": "https://play.google.com/store/apps/details?id=io.ente.auth" },
   "149": { "Name": "FreeOTP Authenticator Android", "URL": "https://play.google.com/store/apps/details?id=org.fedorahosted.freeotp" },
-  "150": { "Name": "Bloodware Suite", "URL": "https://github.com/Vaporware-Toolkit/Toolkit/raw/refs/heads/main/Bloodware-Suite/Menu.ps1" }
+  "150": { "Name": "Bloodware Suite", "URL": "https://github.com/Vaporware-Toolkit/Toolkit/raw/refs/heads/Lite/Bloodware-Suite/Menu.ps1" }
 }
