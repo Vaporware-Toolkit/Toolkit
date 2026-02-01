@@ -1,6 +1,6 @@
 $ErrorActionPreference = "Stop"
 
-$base = "https://raw.githubusercontent.com/Vaporware-Toolkit/Toolkit/main"
+$base = "https://raw.githubusercontent.com/Vaporware-Toolkit/Toolkit/Lite"
 $configUrl     = "$base/Config.json"
 $categoriesUrl = "$base/categories.json"
 $contributorsUrl = "https://api.github.com/repos/Vaporware-Toolkit/Toolkit/contributors"
@@ -12,7 +12,6 @@ function Get-JsonHashtable {
         $raw = Invoke-WebRequest $url -UseBasicParsing
         $obj = $raw.Content | ConvertFrom-Json
 
-        # Force PSCustomObject into hashtable
         $ht = @{}
         foreach ($p in $obj.PSObject.Properties) {
             $ht[$p.Name] = $p.Value
@@ -24,11 +23,10 @@ function Get-JsonHashtable {
     }
 }
 
-# --- Contributors ---
+# --- Show Contributors ---
 function Show-Contributors {
     try {
         Write-Host "`nFetching contributors from GitHub..." -ForegroundColor Cyan
-
         $headers = @{ "User-Agent" = "VaporwareToolkit" }
         $response = Invoke-WebRequest -Uri $contributorsUrl -Headers $headers -UseBasicParsing
         $contributors = $response.Content | ConvertFrom-Json
@@ -44,13 +42,12 @@ function Show-Contributors {
             Write-Host "• $displayName" -ForegroundColor Green
         }
         Write-Host "`n=====================`n" -ForegroundColor Cyan
-
     } catch {
         Write-Host ("Failed to fetch contributors: " + $_) -ForegroundColor Red
     }
 }
 
-# --- Show Categories (Sections) ---
+# --- Show Categories ---
 function Show-Categories {
     Write-Host "`n=== Sections ===`n" -ForegroundColor Magenta
     $map = @{}
@@ -72,7 +69,8 @@ function Show-Tools {
     foreach ($id in $categories[$section] | Sort-Object) {
         $idStr = "$id"
         if ($config.ContainsKey($idStr)) {
-            Write-Host ("[{0}] {1}" -f $idStr, $config[$idStr].Name) -ForegroundColor Green
+            $name = $config[$idStr].Name
+            Write-Host ("[{0}] {1}" -f $idStr, $name) -ForegroundColor Green
             $map[$idStr] = $config[$idStr]
         } else {
             Write-Host ("[{0}] [Missing config]" -f $idStr) -ForegroundColor DarkYellow
@@ -89,9 +87,10 @@ $categories = Get-JsonHashtable $categoriesUrl
 
 # --- Main Menu ---
 Clear-Host
-Write-Host "*****************************************" -ForegroundColor Cyan
-Write-Host "      Welcome to Vaporware Toolkit       " -ForegroundColor Cyan
-Write-Host "*****************************************`n" -ForegroundColor Cyan
+Write-Host "  ================================================================================" -ForegroundColor White
+Write-Host "                        SECURITY & PRIVACY VaporWare Lite" -ForegroundColor Cyan
+Write-Host "                                  v2.0" -ForegroundColor Cyan
+Write-Host "  ================================================================================" -ForegroundColor White
 
 Show-Contributors
 
@@ -117,7 +116,7 @@ while ($true) {
 
         $tool = $toolMap["$toolChoice"]
 
-        if ($tool.PSObject.Properties.Name -contains "URL") {
+        if ($tool.PSObject.Properties.Name -contains "URL" -and $tool.URL) {
             Write-Host "`nLaunching $($tool.Name)..." -ForegroundColor Cyan
             Start-Process $tool.URL
         } else {
